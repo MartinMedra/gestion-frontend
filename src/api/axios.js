@@ -1,7 +1,10 @@
 import axios from 'axios'
 
+const AUTH_API_BASE_URL = import.meta.env.VITE_AUTH_API_BASE_URL || 'http://auth-service.test/api'
+const PIEZAS_API_BASE_URL = import.meta.env.VITE_PIEZAS_API_BASE_URL || 'http://pieces-service.test/api/v1'
+
 export const instanciaAuth = axios.create({
-  baseURL: 'http://localhost:8001/api',
+  baseURL: AUTH_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -9,7 +12,7 @@ export const instanciaAuth = axios.create({
 })
 
 export const instanciaPiezas = axios.create({
-  baseURL: 'http://localhost:8002/api/v1',
+  baseURL: PIEZAS_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -20,7 +23,13 @@ export const instanciaPiezas = axios.create({
 instanciaPiezas.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    // En axios@1.x `config.headers` puede ser un AxiosHeaders (con .set)
+    if (!config.headers) config.headers = {}
+    if (typeof config.headers.set === 'function') {
+      config.headers.set('Authorization', `Bearer ${token}`)
+    } else {
+      config.headers.Authorization = `Bearer ${token}`
+    }
   }
   return config
 })
