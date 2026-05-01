@@ -1,0 +1,89 @@
+version: '3.9'
+
+services:
+
+  # ── Base de datos del Auth Service ─────────────────────────
+  postgres_auth:
+    image: postgres:16-alpine
+    container_name: postgres_auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - red_microservicios
+
+  # ── Base de datos del Pieces Service ───────────────────────
+  postgres_pieces:
+    image: postgres:16-alpine
+    container_name: postgres_pieces
+    environment:
+      POSTGRES_DB: pieces_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_pieces_data:/var/lib/postgresql/data
+    networks:
+      - red_microservicios
+
+  # ── Auth Service (se clona desde GitHub en el build) ───────
+  auth_service:
+    build:
+      context: .
+      dockerfile: docker/auth.Dockerfile
+    container_name: auth_service
+    ports:
+      - "8001:8000"
+    environment:
+      DB_HOST: postgres_auth
+      DB_DATABASE: auth_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: secret
+      JWT_SECRET: clave_super_secreta_compartida_cambiar_en_produccion
+    depends_on:
+      - postgres_auth
+    networks:
+      - red_microservicios
+
+  # ── Pieces Service (se clona desde GitHub en el build) ─────
+  pieces_service:
+    build:
+      context: .
+      dockerfile: docker/pieces.Dockerfile
+    container_name: pieces_service
+    ports:
+      - "8002:8000"
+    environment:
+      DB_HOST: postgres_pieces
+      DB_DATABASE: pieces_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: secret
+      JWT_SECRET: clave_super_secreta_compartida_cambiar_en_produccion
+    depends_on:
+      - postgres_pieces
+    networks:
+      - red_microservicios
+
+  # ── Frontend ────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - auth_service
+      - pieces_service
+    networks:
+      - red_microservicios
+
+networks:
+  red_microservicios:
+    driver: bridge
+
+volumes:
+  postgres_auth_data:
+  postgres_pieces_data:
