@@ -129,7 +129,7 @@ export default function ReportesPage() {
         </div>
       </nav>
 
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 space-y-6">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 space-y-6 animate__animated animate__fadeInUp">
 
         {/* Gráfico 1: Piezas pendientes por proyecto */}
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

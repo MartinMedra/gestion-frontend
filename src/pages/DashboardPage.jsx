@@ -79,7 +79,7 @@ function TarjetaEstadistica({ etiqueta, valor, icono, acento }) {
   )
 }
 
-function Modal({ titulo, onCerrar, nivel = 'proyecto', children }) {
+function Modal({ titulo, onCerrar, nivel = 'proyecto', children , className}) {
   const [animado, setAnimado] = useState(false)
 
   useEffect(() => {
@@ -92,10 +92,15 @@ function Modal({ titulo, onCerrar, nivel = 'proyecto', children }) {
       ? 'bg-cotecmar-navy'
       : nivel === 'bloque'
         ? 'bg-cotecmar-steel'
-        : 'bg-cotecmar-success'
+        : nivel === 'advertencia'
+          ? 'bg-cotecmar-error'
+          : 'bg-cotecmar-success'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className={
+      `fixed inset-0 z-50 flex items-center justify-center p-4`+
+      `${className}`
+    }>
       <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
         onClick={onCerrar}
@@ -146,6 +151,14 @@ export default function DashboardPage() {
   // Control de modales
   const [modalAbierto, setModalAbierto] = useState(null)
   // 'proyecto' | 'bloque' | 'pieza' | null
+
+  // Modal de confirmación para eliminar
+  const [modalConfirmacion, setModalConfirmacion] = useState(null)
+  const [confirmarTipo, setConfirmarTipo] = useState(null)
+  const [confirmarId, setConfirmarId] = useState(null)
+
+  // Modal de confirmación para logout
+  const [modalLogoutConfirmacion, setModalLogoutConfirmacion] = useState(false)
 
   // Vista en móvil: tabs del explorador jerárquico
   const [columnaMovil, setColumnaMovil] = useState('proyectos')
@@ -279,35 +292,68 @@ export default function DashboardPage() {
     }
   }
 
-  // ── Eliminar con confirmación nativa
-  const eliminar = async (tipo, id) => {
-    if (!window.confirm('¿Estás seguro de eliminar este elemento?')) return
+  // ── Eliminar con confirmación en modal
+  const abrirModalConfirmacion = (tipo, id) => {
+    setConfirmarTipo(tipo)
+    setConfirmarId(id)
+    setModalConfirmacion(true)
+  }
+
+  const cerrarModalConfirmacion = () => {
+    setModalConfirmacion(false)
+    setConfirmarTipo(null)
+    setConfirmarId(null)
+  }
+
+  const confirmarEliminar = async () => {
+    if (!confirmarTipo || !confirmarId) return
 
     try {
-      if (tipo === 'proyecto') {
-        await eliminarProyecto(id)
+      if (confirmarTipo === 'proyecto') {
+        await eliminarProyecto(confirmarId)
         setProyectoActivo(null)
         cargarProyectos()
       }
-      if (tipo === 'bloque') {
-        await eliminarBloque(proyectoActivo.id, id)
+      if (confirmarTipo === 'bloque') {
+        await eliminarBloque(proyectoActivo.id, confirmarId)
         setBloqueActivo(null)
         const res = await obtenerBloques(proyectoActivo.id, { por_pagina: 100 })
         setBloques(res.data.data)
       }
-      if (tipo === 'pieza') {
-        await eliminarPieza(bloqueActivo.id, id)
+      if (confirmarTipo === 'pieza') {
+        await eliminarPieza(bloqueActivo.id, confirmarId)
         const res = await obtenerPiezas(bloqueActivo.id, { por_pagina: 100 })
         setPiezas(res.data.data)
       }
     } catch (error) {
       console.error('Error al eliminar:', error)
+    } finally {
+      cerrarModalConfirmacion()
     }
   }
 
+  // ── Eliminar con confirmación nativa
+  const eliminar = async (tipo, id) => {
+    abrirModalConfirmacion(tipo, id)
+  }
+
   const manejarLogout = async () => {
-    await logout()
-    navegar('/login')
+    setModalLogoutConfirmacion(true)
+  }
+
+  const confirmarLogout = async () => {
+    try {
+      await logout()
+      navegar('/login')
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error)
+    } finally {
+      setModalLogoutConfirmacion(false)
+    }
+  }
+
+  const cancelarLogout = () => {
+    setModalLogoutConfirmacion(false)
   }
 
   const seleccionarProyecto = (proyecto) => {
@@ -361,7 +407,7 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 animate__animated animate__fadeInUp">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <TarjetaEstadistica
             etiqueta="Proyectos activos"
@@ -732,6 +778,62 @@ export default function DashboardPage() {
             <Boton onClick={guardar} loading={guardando} className="w-full">
               {guardando ? 'Guardando…' : 'Crear pieza'}
             </Boton>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal de confirmación para eliminar */}
+      {modalConfirmacion && (
+        <Modal titulo="Confirmar eliminación" onCerrar={cerrarModalConfirmacion} nivel={confirmarTipo}>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              ¿Estás seguro de que quieres eliminar {' '}
+              <span className="font-semibold text-slate-900">
+                {confirmarTipo === 'proyecto'
+                  ? 'este proyecto'
+                  : confirmarTipo === 'bloque'
+                    ? 'este bloque'
+                    : 'esta pieza'}
+              </span>
+              ? Esta acción no se puede deshacer.
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <Boton variant="secondary" onClick={cerrarModalConfirmacion}>
+                Cancelar
+              </Boton>
+              <Boton
+                variant="base"
+                onClick={confirmarEliminar}
+                className="!text-cotecmar-surface bg-cotecmar-error hover:bg-cotecmar-error/65"
+              >
+                Eliminar
+              </Boton>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal de confirmación para logout */}
+      {modalLogoutConfirmacion && (
+        <Modal titulo="Cerrar sesión" onCerrar={cancelarLogout} nivel="advertencia">
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              ¿Estás seguro de que deseas <span className="font-semibold text-slate-900">cerrar tu sesión</span>?
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <Boton variant="secondary" onClick={cancelarLogout}>
+                Cancelar
+              </Boton>
+              <Boton
+                variant="base"
+                onClick={confirmarLogout}
+                className="!text-cotecmar-surface bg-cotecmar-error hover:bg-cotecmar-error/65"
+              >
+                Cerrar sesión
+              </Boton>
+            </div>
           </div>
         </Modal>
       )}

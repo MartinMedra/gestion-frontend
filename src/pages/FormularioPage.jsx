@@ -266,7 +266,7 @@ export default function FormularioPage() {
           </Alerta>
         )}
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 animate__animated animate__fadeInUp">
           {/* Panel de contexto (40%) */}
           <aside className="lg:col-span-2">
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
