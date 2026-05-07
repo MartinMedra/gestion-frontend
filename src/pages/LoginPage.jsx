@@ -16,11 +16,9 @@ export default function LoginPage() {
   const manejarCambio = (e) => {
     const { name, value } = e.target
     setFormulario(prev => ({ ...prev, [name]: value }))
-    // Limpia el error del campo cuando el usuario empieza a escribir
     if (errores[name]) setErrores(prev => ({ ...prev, [name]: '' }))
   }
 
-  // Validación en navegador (RB del frontend)
   const validar = () => {
     const nuevosErrores = {}
     if (!formulario.email) {
@@ -80,7 +78,6 @@ export default function LoginPage() {
     <div className="min-h-screen bg-cotecmar-surface animate__animated animate__fadeIn">
       <div className="min-h-screen grid lg:grid-cols-2">
 
-        {/* Panel izquierdo (desktop): ilustración SVG */}
         <div className="hidden lg:flex relative overflow-hidden bg-cotecmar-navy text-white">
           <div className="absolute inset-0 opacity-20">
             <svg viewBox="0 0 800 800" className="h-full w-full" aria-hidden="true">
@@ -125,7 +122,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Panel derecho: formulario */}
+
         <div className="flex items-center justify-center p-6 sm:p-10">
           <div className="w-full max-w-md">
 

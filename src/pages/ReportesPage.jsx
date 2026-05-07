@@ -131,7 +131,6 @@ export default function ReportesPage() {
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 space-y-6 animate__animated animate__fadeInUp">
 
-        {/* Gráfico 1: Piezas pendientes por proyecto */}
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="border-l-4 border-cotecmar-steel pl-3">
@@ -205,7 +204,7 @@ export default function ReportesPage() {
           )}
         </div>
 
-        {/* Gráfico 2: Totales por estado */}
+
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="border-l-4 border-cotecmar-success pl-3">

@@ -24,7 +24,6 @@ export function ProveedorAutenticacion({ children }) {
     const respuesta = await iniciarSesion(credenciales)
     const { access_token, user } = respuesta.data
 
-    // Guardamos en estado y en localStorage para persistir la sesión
     setToken(access_token)
     setUsuario(user)
     localStorage.setItem('token', access_token)
@@ -37,7 +36,6 @@ export function ProveedorAutenticacion({ children }) {
     try {
       await cerrarSesion(token)
     } finally {
-      // Limpiamos siempre, aunque el servidor falle
       setToken(null)
       setUsuario(null)
       localStorage.removeItem('token')

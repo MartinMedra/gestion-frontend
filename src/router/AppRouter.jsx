@@ -5,10 +5,6 @@ import DashboardPage  from '../pages/DashboardPage'
 import FormularioPage from '../pages/FormularioPage'
 import ReportesPage   from '../pages/ReportesPage'
 
-/**
- * RutaProtegida: si el usuario no está autenticado,
- * lo redirige al login automáticamente.
- */
 function RutaProtegida({ children }) {
   const { estaAutenticado, cargando } = useAuth()
 

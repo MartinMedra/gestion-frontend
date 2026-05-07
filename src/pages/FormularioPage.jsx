@@ -84,26 +84,21 @@ export default function FormularioPage() {
   const { logout, usuario } = useAuth()
   const navegar = useNavigate()
 
-  // Datos de los selectores
   const [proyectos, setProyectos] = useState([])
   const [bloques,   setBloques]   = useState([])
   const [piezas,    setPiezas]    = useState([])
 
-  // Datos de la pieza seleccionada (para mostrar peso teórico)
   const [piezaSeleccionada, setPiezaSeleccionada] = useState(null)
 
-  // Estado del formulario
   const [formulario, setFormulario] = useState(estadoInicial)
   const [errores,    setErrores]    = useState({})
   const [enviando,   setEnviando]   = useState(false)
   const [mensajeExito, setMensajeExito] = useState('')
 
-  // Diferencia calculada en tiempo real
   const diferenciaPeso = piezaSeleccionada && formulario.pesoReal
     ? (parseFloat(formulario.pesoReal) - parseFloat(piezaSeleccionada.peso_teorico)).toFixed(3)
     : null
 
-  // Cargar proyectos al montar el componente
   useEffect(() => {
     obtenerProyectos({ estado: 'activo', por_pagina: 100 })
       .then(res => setProyectos(res.data.data))
@@ -118,7 +113,6 @@ export default function FormularioPage() {
       .catch(console.error)
   }, [formulario.proyectoId])
 
-  // Cargar piezas cuando cambia el bloque
   useEffect(() => {
     if (!formulario.bloqueId) return
     obtenerPiezas(formulario.bloqueId, { por_pagina: 100 })
@@ -145,7 +139,6 @@ export default function FormularioPage() {
 
     setFormulario(prev => {
       const nuevo = { ...prev, [name]: value }
-      // Al cambiar proyecto, resetear bloque y pieza
       if (name === 'proyectoId') { nuevo.bloqueId = ''; nuevo.piezaId = '' }
       if (name === 'bloqueId')   { nuevo.piezaId = '' }
       return nuevo
@@ -186,14 +179,12 @@ export default function FormularioPage() {
       })
 
       setMensajeExito('Registro de fabricación guardado correctamente.')
-      // Resetear solo los campos del registro, no los selectores
       setFormulario(prev => ({ ...prev, pesoReal: '', observaciones: '', estado: 'fabricada' }))
       setPiezaSeleccionada(null)
 
     } catch (error) {
       const erroresBackend = error.response?.data?.errors
       if (erroresBackend) {
-        // Mapear errores del backend al formulario
         const mapeados = {}
         if (erroresBackend.peso_real)     mapeados.pesoReal = erroresBackend.peso_real[0]
         if (erroresBackend.estado)        mapeados.estado   = erroresBackend.estado[0]

@@ -23,7 +23,6 @@ export const instanciaPiezas = axios.create({
 instanciaPiezas.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {
-    // En axios@1.x `config.headers` puede ser un AxiosHeaders (con .set)
     if (!config.headers) config.headers = {}
     if (typeof config.headers.set === 'function') {
       config.headers.set('Authorization', `Bearer ${token}`)

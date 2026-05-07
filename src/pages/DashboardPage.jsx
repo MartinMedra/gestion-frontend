@@ -139,42 +139,32 @@ export default function DashboardPage() {
   const { logout, usuario } = useAuth()
   const navegar = useNavigate()
 
-  // Datos
   const [proyectos, setProyectos] = useState([])
   const [bloques, setBloques] = useState([])
   const [piezas, setPiezas] = useState([])
 
-  // Selección activa en el explorador jerárquico
   const [proyectoActivo, setProyectoActivo] = useState(null)
   const [bloqueActivo, setBloqueActivo] = useState(null)
 
-  // Control de modales
   const [modalAbierto, setModalAbierto] = useState(null)
-  // 'proyecto' | 'bloque' | 'pieza' | null
 
-  // Modal de confirmación para eliminar
   const [modalConfirmacion, setModalConfirmacion] = useState(null)
   const [confirmarTipo, setConfirmarTipo] = useState(null)
   const [confirmarId, setConfirmarId] = useState(null)
 
-  // Modal de confirmación para logout
   const [modalLogoutConfirmacion, setModalLogoutConfirmacion] = useState(false)
 
-  // Vista en móvil: tabs del explorador jerárquico
   const [columnaMovil, setColumnaMovil] = useState('proyectos')
 
-  // Estado del formulario del modal
   const [formularioModal, setFormularioModal] = useState({})
   const [erroresModal, setErroresModal] = useState({})
   const [guardando, setGuardando] = useState(false)
   const [mensajeExito, setMensajeExito] = useState('')
 
-  // ── Carga inicial de proyectos
   useEffect(() => {
     cargarProyectos()
   }, [])
 
-  // ── Cargar bloques cuando cambia el proyecto activo
   useEffect(() => {
     if (!proyectoActivo) {
       setBloques([])
@@ -190,7 +180,6 @@ export default function DashboardPage() {
     setPiezas([])
   }, [proyectoActivo])
 
-  // ── Cargar piezas cuando cambia el bloque activo
   useEffect(() => {
     if (!bloqueActivo) {
       setPiezas([])
@@ -208,7 +197,6 @@ export default function DashboardPage() {
       .catch(console.error)
   }
 
-  // ── Abrir modal limpio
   const abrirModal = (tipo) => {
     setFormularioModal({})
     setErroresModal({})
@@ -224,7 +212,6 @@ export default function DashboardPage() {
     if (erroresModal[name]) setErroresModal(prev => ({ ...prev, [name]: '' }))
   }
 
-  // ── Guardar según el tipo de modal abierto
   const guardar = async () => {
     setGuardando(true)
     setErroresModal({})
@@ -255,7 +242,6 @@ export default function DashboardPage() {
 
         await crearBloque(proyectoActivo.id, formularioModal)
 
-        // Recargar bloques del proyecto activo
         const res = await obtenerBloques(proyectoActivo.id, { por_pagina: 100 })
         setBloques(res.data.data)
         setMensajeExito('Bloque creado correctamente.')
@@ -292,7 +278,6 @@ export default function DashboardPage() {
     }
   }
 
-  // ── Eliminar con confirmación en modal
   const abrirModalConfirmacion = (tipo, id) => {
     setConfirmarTipo(tipo)
     setConfirmarId(id)
@@ -332,7 +317,6 @@ export default function DashboardPage() {
     }
   }
 
-  // ── Eliminar con confirmación nativa
   const eliminar = async (tipo, id) => {
     abrirModalConfirmacion(tipo, id)
   }
@@ -659,7 +643,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Modales */}
       {modalAbierto === 'proyecto' && (
         <Modal titulo="Nuevo proyecto" onCerrar={cerrarModal} nivel="proyecto">
           <div className="space-y-4">
@@ -782,7 +765,6 @@ export default function DashboardPage() {
         </Modal>
       )}
 
-      {/* Modal de confirmación para eliminar */}
       {modalConfirmacion && (
         <Modal titulo="Confirmar eliminación" onCerrar={cerrarModalConfirmacion} nivel={confirmarTipo}>
           <div className="space-y-4">
@@ -814,7 +796,6 @@ export default function DashboardPage() {
         </Modal>
       )}
 
-      {/* Modal de confirmación para logout */}
       {modalLogoutConfirmacion && (
         <Modal titulo="Cerrar sesión" onCerrar={cancelarLogout} nivel="advertencia">
           <div className="space-y-4">
